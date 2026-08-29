@@ -56,7 +56,7 @@ std::vector<std::vector<std::string>> agrupar_blocos(std::vector<std::string> te
 {
     std::vector<std::vector<std::string>> blocos;
 
-    for (int i = 0; i < texto_bytes.size(); i += 26)
+    for (size_t i = 0; i < texto_bytes.size(); i += 26)
     {
         std::vector<std::string> bloco_atual;
 
@@ -76,12 +76,12 @@ std::vector<std::string> transpor_brasileirao(std::vector<std::vector<std::strin
 {
     std::vector<std::string> texto_final;
 
-    for (int i = 0; i < blocos_texto.size(); i++)
+    for (size_t i = 0; i < blocos_texto.size(); i++)
     {
         std::vector<std::string> bloco_atual = blocos_texto[i];
         int tamanho_bloco = bloco_atual.size();
 
-        for (int j = 0; j < 26; j++)
+        for (size_t j = 0; j < 26; j++)
         {
             int posicao_alvo = CHAVES_RODADAS[rodada_chave - 1][j];
 
@@ -100,7 +100,7 @@ void arquivo_encriptado (std::vector<std::string> texto_final, std::string nome_
 
     if (arquivo_saida.is_open())
     {
-        for(int i = 0; i < texto_final.size(); i++)
+        for(size_t i = 0; i < texto_final.size(); i++)
         {
             arquivo_saida << texto_final[i];
         }
