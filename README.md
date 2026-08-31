@@ -1,96 +1,106 @@
-# BR-BEPO — Trabalho 1 de Criptografia
+# BR-BEPO
 
-Implementacao em C++ de uma cifra propria que combina substituicao e transposicao, com comparacao de tempos de cifragem e decifragem contra AES e RSA da OpenSSL.
+Implementação em C++ de uma cifra própria que combina substituição e transposição, com comparação de tempo de cifragem e decifragem contra AES e RSA da OpenSSL.
 
 ## Cifra BR-BEPO
 
-A substituicao trabalha byte a byte:
+A substituição é feita byte a byte. Letras ASCII são mapeadas pelo arranjo `BPOVDLJZWAUIECTSRNMYXKQGHF`, enquanto os demais bytes são representados em hexadecimal.
 
-- letras ASCII maiusculas: `U` + letra correspondente no layout `BPOVDLJZWAUIECTSRNMYXKQGHF`;
-- letras ASCII minusculas: `L` + letra correspondente no mesmo layout;
-- demais bytes: `X` + dois digitos hexadecimais.
+Após a substituição, os tokens são agrupados em blocos de até 26 elementos e transpostos por uma das 25 permutações armazenadas em `setup.h`. As permutações foram obtidas a partir dos resultados do Campeonato Brasileiro de 2002.
 
-Os tokens sao agrupados em blocos de ate 26 elementos. A transposicao usa uma das 25 permutacoes de `CHAVES_RODADAS`, derivadas pelo `gerador_tabela.cpp` a partir de `resultados_brasileirao_2002.txt`. O gerador fecha uma nova permutacao a cada 13 partidas processadas; portanto, essas 25 chaves nao devem ser descritas automaticamente como 25 rodadas oficiais do campeonato.
+## Comparação
 
-A cifra preserva os bytes do arquivo. Caracteres UTF-8 fora de ASCII sao representados pelos bytes hexadecimais correspondentes e recuperados byte a byte.
+O experimento compara:
 
-## AES e RSA usados na comparacao
+- BR-BEPO;
+- AES-256-CBC;
+- RSA-2048 com OAEP e SHA-256.
 
-Como o enunciado pede AES e RSA da OpenSSL sem fixar parametros, a implementacao usa:
+São utilizados quatro arquivos em diferentes faixas de tamanho:
 
-- AES-256-CBC pela API EVP da OpenSSL, com padding PKCS#7;
-- RSA-2048 com OAEP, SHA-256 e MGF1-SHA-256 pela API EVP;
-- para permitir a cifragem dos arquivos com RSA-2048/OAEP-SHA256, a entrada e processada em blocos de no maximo 190 bytes.
+- `<1K`;
+- `1K–10K`;
+- `10K–100K`;
+- `>100K`.
 
-A leitura dos arquivos e a preparacao das chaves/IV ficam fora do intervalo cronometrado. Cada resultado de decifragem e conferido byte a byte contra a entrada original.
+Os arquivos utilizados estão em `dados_gutenberg/`.
 
-## Arquivos do Project Gutenberg
+## Dependências
 
-O diretorio `dados_gutenberg/` contem os quatro arquivos usados no experimento:
-
-- `<1K`: `lt1k_73576_excerpt.txt` — trecho textual contiguo e verbatim de *A Kiss for the Conqueror*;
-- `1K–10K`: `73576-0.txt` — *A Kiss for the Conqueror*, arquivo completo;
-- `10K–100K`: `1065.txt` — *The Raven*, arquivo completo;
-- `>100K`: `41102-0.txt` — *The King's Threshold; and On Baile's Strand*, copia local do texto do Project Gutenberg usada no experimento.
-
-A faixa `<1K` usa um trecho verbatim porque um arquivo `.txt` completo do Project Gutenberg nao atendia naturalmente a essa faixa. Para reprodutibilidade, `dados_gutenberg/manifesto.csv` registra o tamanho, o SHA-256 efetivamente usado e a URL de origem de cada entrada. Os arquivos `73576-0.txt` e `1065.txt` tambem sao conferidos contra snapshots conhecidos. A copia local `41102-0.txt` e validada pelo manifesto e pela faixa `>100K`, sem afirmar correspondencia byte a byte com um snapshot remoto.
-
-## Dependencias
-
-- compilador C++17;
+- C++17;
 - GNU Make;
 - OpenSSL com headers de desenvolvimento;
-- Python 3 e Matplotlib para gerar os graficos.
+- Python 3;
+- Matplotlib.
 
-## Compilar
+## Compilação
 
-    make
+```bash
+make
+```
 
-Sao gerados:
+Esse comando gera:
 
-- `programa_BRBEPO`: demonstracao interativa da cifra propria usando `texto.txt`;
-- `benchmark`: comparacao BR-BEPO, AES e RSA;
-- `gerador_tabela`: reproduz as chaves a partir dos resultados do campeonato.
+- `programa_BRBEPO`;
+- `benchmark`;
+- `gerador_tabela`.
+
+## Execução da BR-BEPO
+
+Coloque o texto de entrada em `texto.txt` e execute:
+
+```bash
+./programa_BRBEPO
+```
+
+O programa solicita uma chave entre 1 e 25 e gera:
+
+- `arquivoencriptado.txt`;
+- `arquivodescriptado.txt`.
 
 ## Testes
 
-    make test
+```bash
+make test
+```
 
-Os testes verificam:
+Os testes verificam a cifragem e decifragem da BR-BEPO, AES e RSA, a geração das permutações e a preparação do corpus.
 
-- as 25 linhas de `CHAVES_RODADAS` como permutacoes de `0..25`;
-- o exemplo conhecido `A bá!` com a chave 1;
-- round-trip BR-BEPO para todos os 256 valores de byte em todas as 25 chaves e varios tamanhos de entrada;
-- round-trip AES em limites de bloco;
-- round-trip RSA antes, no limite e depois do bloco de 190 bytes;
-- reproducao exata de `CHAVES_RODADAS` pelo `gerador_tabela`;
-- execucao integrada do benchmark e criacao dos dois graficos;
-- regras de preparacao e validacao dos arquivos do Project Gutenberg.
+## Experimento
 
-## Demonstracao da BR-BEPO
+Para executar a comparação completa:
 
-Coloque a entrada em `texto.txt` e execute:
+```bash
+make experimento
+```
 
-    ./programa_BRBEPO
+O experimento usa a chave BR-BEPO 25, valida os quatro arquivos do corpus e executa uma cifragem e uma decifragem com cada algoritmo.
 
-O programa cria `arquivoencriptado.txt` e `arquivodescriptado.txt`.
+Os resultados são gravados em:
 
-## Experimento pedido no enunciado
+```text
+resultados/
+├── benchmark.csv
+├── grafico_cifragem.png
+└── grafico_decifragem.png
+```
 
-O experimento final usa a chave BR-BEPO 25 e executa uma medicao de cifragem e uma de decifragem com BR-BEPO, AES e RSA em cada um dos quatro arquivos:
+O arquivo `benchmark.csv` contém:
 
-    make experimento
+```text
+arquivo,tamanho_bytes,algoritmo,operacao,tempo_ns
+```
 
-Esse comando valida os quatro arquivos, executa o benchmark e gera:
+## Ordem recomendada
 
-- `resultados/benchmark.csv`;
-- `resultados/grafico_cifragem.png`;
-- `resultados/grafico_decifragem.png`.
+```bash
+make
+make test
+make experimento
+```
 
-O CSV possui as colunas:
+Para remover os binários e arquivos temporários:
 
-    arquivo,tamanho_bytes,algoritmo,operacao,tempo_ns
-
-## Arquivo de resultados do Brasileirao
-
-`gerador_tabela.cpp` le `resultados_brasileirao_2002.txt` e gera uma matriz `25 x 26`. O comando `make test` verifica que a matriz gerada e exatamente a mesma armazenada em `setup.h`.
+```bash
+make clean
+```
