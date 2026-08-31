@@ -1,0 +1,12 @@
+programa_BRBEPO
+benchmark
+gerador_tabela
+tests/testes
+*.o
+arquivoencriptado.txt
+arquivodescriptado.txt
+__pycache__/
+# Gerados pelo benchmark de integracao; os resultados finais podem ser versionados deliberadamente.
+resultados/benchmark_teste.csv
+
+.venv/

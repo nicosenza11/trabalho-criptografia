@@ -16,7 +16,7 @@ struct Time {
     int gols_pro;
 };
 
-// Criterios de desempate oficiais
+// Criterios de ordenacao usados pelo gerador
 bool ordenarTabela(const Time& a, const Time& b) {
     if (a.pontos != b.pontos) return a.pontos > b.pontos;
     if (a.vitorias != b.vitorias) return a.vitorias > b.vitorias;
@@ -34,9 +34,9 @@ std::string trim(const std::string& str) {
 }
 
 int main() {
-    std::ifstream arquivo("rodadas_brasileirao_2002.txt");
+    std::ifstream arquivo("resultados_brasileirao_2002.txt");
     if (!arquivo.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo rodadas_brasileirao_2002.txt" << std::endl;
+        std::cerr << "Erro ao abrir o arquivo resultados_brasileirao_2002.txt" << std::endl;
         return 1;
     }
 
@@ -102,7 +102,7 @@ int main() {
                 }
                 matriz_campeonato.push_back(rodada_ids);
                 
-                // Trava para pegar apenas a Primeira Fase (25 rodadas)
+                // Limita a primeira fase a 325 partidas (25 blocos de 13)
                 if (matriz_campeonato.size() == 25) break; 
             }
         }
